@@ -1,0 +1,10 @@
+{
+  // 运行测试时显示每个测试的名字和日志
+  "go.testFlags": ["-v", "-count=1"],
+  "go.testTimeout": "120s",
+  // 保存时自动格式化、整理 import
+  "[go]": {
+    "editor.formatOnSave": true,
+    "editor.codeActionsOnSave": { "source.organizeImports": "explicit" }
+  }
+}

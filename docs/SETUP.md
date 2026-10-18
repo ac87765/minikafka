@@ -12,7 +12,7 @@
    能看到 `go version go1.22` 或更高的版本号就成功了。
 
 > 国内网络下载依赖慢的话，执行一次：`go env -w GOPROXY=https://goproxy.cn,direct`
-> （本项目目前只用标准库，不下载依赖也能跑。）
+> （从阶段 2 开始项目依赖 `google.golang.org/protobuf`，第一次 `go test` 时会自动下载。）
 
 ## 2. 安装 VS Code 和 Go 插件
 

@@ -1,0 +1,15 @@
+# buf 是 protoc 的替代品：buf generate 生成 Go 代码，buf breaking 检查不兼容的改动。
+# 生成的代码已经提交到 pb/，只改 Go 代码的话不需要装 buf。
+version: v2
+modules:
+  - path: proto
+lint:
+  use:
+    - STANDARD
+  except:
+    # 阶段 2 有意用不同包名放冻结快照，不套用目录和版本后缀的约定。
+    - PACKAGE_DIRECTORY_MATCH
+    - PACKAGE_VERSION_SUFFIX
+breaking:
+  use:
+    - WIRE_JSON

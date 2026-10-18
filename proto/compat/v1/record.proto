@@ -1,0 +1,17 @@
+// 冻结的快照：minikafka.Record 第一次发布时的样子。永远不要修改这个文件。
+//
+// 测试用它扮演「还没升级的旧代码」。proto 包名故意和 minikafka 不同，
+// 否则两个 Go 包会在全局注册表里注册同一个消息名而冲突。
+// 包名不同不影响互通：线上的字节里根本没有消息名和字段名，只有字段编号。
+syntax = "proto3";
+
+package minikafka.compat.v1;
+
+option go_package = "github.com/ac87765/minikafka/pb/compat/v1;recordv1";
+
+message Record {
+  uint64 offset = 1;
+  bytes key = 2;
+  bytes value = 3;
+  bool tombstone = 4;
+}

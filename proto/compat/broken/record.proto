@@ -1,0 +1,20 @@
+// 反面教材：一个「看起来无害」的错误演进。永远不要这样做。
+//
+// 某人觉得 v2 的 timestamp_ms 没用，把它删掉了，然后把空出来的编号 5
+// 给了一个新字段 producer_id，类型还不一样。编译器不会报错，因为单看这个文件
+// 它是完全合法的。测试 TestReusedFieldNumberSilentlyLosesData 展示了后果。
+//
+// 正确做法是：reserved 5; reserved "timestamp_ms"; 然后给 producer_id 用新编号 7。
+syntax = "proto3";
+
+package minikafka.compat.broken;
+
+option go_package = "github.com/ac87765/minikafka/pb/compat/broken;recordbroken";
+
+message Record {
+  uint64 offset = 1;
+  bytes key = 2;
+  bytes value = 3;
+  bool tombstone = 4;
+  string producer_id = 5; // 错误：复用了 timestamp_ms 的编号
+}

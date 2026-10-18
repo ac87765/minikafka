@@ -1,0 +1,35 @@
+// minikafka 的记录格式，当前版本。
+//
+// 规则（改这个文件之前先读 lessons/02-encoding-and-evolution.md）：
+//   1. 字段编号一旦发布就永远属于那个字段。不许改编号，不许改类型。
+//   2. 只能加新字段，而且新字段的零值必须是「旧数据」的合理含义。
+//   3. 删字段时把编号和名字写进 reserved，防止以后有人复用。
+//
+// proto/compat/v1/record.proto 是这个文件第一次发布时的快照，测试用它模拟「旧代码」。
+syntax = "proto3";
+
+package minikafka;
+
+option go_package = "github.com/ac87765/minikafka/pb;pb";
+
+message Record {
+  // ---- v1：和阶段 1 的磁盘格式字段一一对应 ----
+  uint64 offset = 1;
+  bytes key = 2;    // 空表示没有 key
+  bytes value = 3;
+  bool tombstone = 4;
+
+  // ---- v2：schema 演进新增 ----
+
+  // 生产者写入时的时间，Unix 毫秒。0 表示「不知道」，也就是 v1 写的旧数据。
+  // 阶段 1 的保留策略只能用段文件的 mtime 代替，有了它就能按记录本身的时间删除。
+  int64 timestamp_ms = 5;
+
+  // 应用自定义的元数据（比如 trace id、内容类型），Kafka 0.11 也是这样加上 headers 的。
+  repeated Header headers = 6;
+}
+
+message Header {
+  string key = 1;
+  bytes value = 2;
+}

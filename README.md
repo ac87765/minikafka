@@ -18,7 +18,7 @@ go test ./...         # 跑全部测试
 | 阶段 | 内容 | DDIA | 状态 |
 |---|---|---|---|
 | 1 | 单机存储：segment、稀疏索引、崩溃恢复、压缩 | 第 3 章 | ✅ |
-| 2 | Protobuf 记录与 RPC、schema 演进 | 第 4 章 | |
+| 2 | Protobuf 记录与 RPC、schema 演进 | 第 4 章 | 🚧 2.1 完成 |
 | 3 | Leader-Follower 复制、ISR、HW、acks | 第 5 章 | |
 | 4 | 分区、哈希路由、再平衡 | 第 6 章 | |
 | 5 | Raft 管理元数据 | 第 8、9 章 | |
@@ -43,5 +43,19 @@ go test ./...         # 跑全部测试
 | 压缩中途崩溃不丢数据 | 写临时文件 → fsync → rename | `TestCrashDuringCompaction` |
 
 **不保证的：** 单机上，活跃段中间出现位翻转时，截断会丢掉其后已经确认过的记录。这要靠阶段 3 的副本解决。
+
+## 阶段 2（进行中）
+
+schema 在 [proto/](proto/)，生成的 Go 代码在 `pb/`（已提交，不装 buf 也能编译）。
+
+| 保证 | 怎么做到的 | 对应测试 |
+|---|---|---|
+| 新代码能读旧代码写的记录（向后兼容） | 新字段零值表示「旧数据，不知道」 | `TestBackwardCompatNewReadsOld` |
+| 旧代码能读新代码写的记录（向前兼容） | 未知字段按 wire type 跳过并保留 | `TestForwardCompatOldReadsNew` |
+| 旧代码读改写不会抹掉新字段 | 直接操作 protobuf 对象，unknown fields 随之写回 | `TestOldCodeRewritePreservesNewFields` |
+
+**不保证的：** 旧代码如果把记录转成自己的结构体再写回，新字段会丢（`TestOldCodeViaDomainStructLosesNewFields`）。
+
+修改 schema 后重新生成代码：`buf generate`；检查兼容性：`buf breaking proto --against '.git#branch=main'`。
 
 课程笔记在 [lessons/](lessons/)。
